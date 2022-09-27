@@ -40,6 +40,7 @@ func main() {
 	// 	fmt.Println(fmt.Sprintf("Bytes Written: %d", n))
 	// })
 	http.HandleFunc("/", handlers.Home)
+	http.HandleFunc("/home", handlers.Home)
 	http.HandleFunc("/about", handlers.About)
 	// http.HandleFunc("/divide", Divide)
 
