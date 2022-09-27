@@ -23,7 +23,10 @@ func RenderTemplate(w http.ResponseWriter, tmpl string) {
 			fmt.Println("!ok Error:", err1)
 		}
 		buf := new(bytes.Buffer)
-		_ = t.Execute(buf, nil)
+		err2 := t.Execute(buf, nil)
+		if err2 != nil {
+			fmt.Println("Error at t.Execute", err2)
+		}
 		_, err := buf.WriteTo(w)
 		if err != nil {
 			fmt.Println("Error writing template to browser", err)
