@@ -4,13 +4,18 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/nomansalhab/golang_training_project/pkg/config"
 	"github.com/nomansalhab/golang_training_project/pkg/handlers"
 	"github.com/nomansalhab/golang_training_project/pkg/render"
 )
 
 const portNumber = ":8016"
+
+var app config.AppConfig
+var session *scs.SessionManager
 
 // addValues adds two integers and returns the result
 // func addValues(x, y int) int {
@@ -35,7 +40,17 @@ const portNumber = ":8016"
 
 // main is the main application function
 func main() {
-	var app config.AppConfig
+
+	// * Change This to true in production mode
+	app.InProduction = false
+
+	session = scs.New()
+	session.Lifetime = 24 * time.Hour              //? 30Min for example for more secure auth
+	session.Cookie.Persist = true                  //? if we want to logout when the session is closed we set Persist to False
+	session.Cookie.SameSite = http.SameSiteLaxMode //? Cookie Structness
+	session.Cookie.Secure = app.InProduction       //? in production we set it to true for https
+
+	app.Session = session
 
 	tc, err := render.CreateTemplateCache()
 	if err != nil {
