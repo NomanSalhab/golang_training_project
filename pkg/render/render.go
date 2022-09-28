@@ -4,28 +4,51 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"path/filepath"
+
+	"github.com/nomansalhab/golang_training_project/pkg/config"
+	"github.com/nomansalhab/golang_training_project/pkg/models"
 )
 
 var functions = template.FuncMap{}
 
-// RenderTemplate Function
-func RenderTemplate(w http.ResponseWriter, tmpl string) {
+var app *config.AppConfig
 
-	tc, err1 := CreateTemplateCache()
-	if err1 != nil {
-		fmt.Println("CreateTemplateCache Error:", err1)
-		log.Fatal(err1)
+// NewTemplate sets the config for the new template package
+func NewTemplate(a *config.AppConfig) {
+	app = a
+}
+
+func AddDefaultData(td *models.TemplateData) *models.TemplateData {
+	return td
+}
+
+// RenderTemplate Function
+func RenderTemplate(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
+	var tc map[string]*template.Template
+	if app.UseCache {
+		// * Get The Template Cache From The AppConfig
+		tc = app.TemplateCache
+	} else {
+		tc, _ = CreateTemplateCache()
 	}
+
+	// tc, err1 := CreateTemplateCache()
+	// if err1 != nil {
+	// 	fmt.Println("CreateTemplateCache Error:", err1)
+	// 	log.Fatal(err1)
+	// }
 	t, ok := tc[tmpl]
 	if !ok {
-		// log.Fatal(err1)
-		fmt.Println("!ok Error:", err1)
+		// log.Fatal("could not get template from template cache")
+		fmt.Println("!ok Error: could not get template from template cache")
 	}
 	buf := new(bytes.Buffer)
-	err2 := t.Execute(buf, nil)
+
+	td = AddDefaultData(td)
+
+	err2 := t.Execute(buf, td)
 	if err2 != nil {
 		fmt.Println("Error at t.Execute", err2)
 	}
@@ -52,7 +75,9 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 		return myCache, err
 	}
 	for _, page := range pages {
+		// fmt.Println("index is:", i)
 		name := filepath.Base(page)
+		// fmt.Println("Page Name in CreateTemplateCache Function is:", name, "in Pages Variable:", pages)
 		ts, err := template.New(name).Funcs(functions).ParseFiles(page)
 		if err != nil {
 			return myCache, err
@@ -67,7 +92,8 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 				return myCache, err
 			}
 			myCache[name] = ts
-			return myCache, nil
+			// ? Remember This Line Idiot
+			// // return myCache, nil
 
 		}
 

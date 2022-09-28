@@ -3,18 +3,49 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/nomansalhab/golang_training_project/pkg/config"
+	"github.com/nomansalhab/golang_training_project/pkg/models"
 	"github.com/nomansalhab/golang_training_project/pkg/render"
 )
 
+// Repo the reposirory user by the handlers
+var Repo *Repository
+
+// Repository is the repository type
+type Repository struct {
+	App *config.AppConfig
+}
+
+// NewRepo creates a ner Repository
+func NewRepo(a *config.AppConfig) *Repository {
+	return &Repository{
+		App: a,
+	}
+}
+
+// NewHandlers sets the repository for the handlers
+func NewHandlers(r *Repository) {
+	Repo = r
+}
+
 // Home Page Handler
-func Home(w http.ResponseWriter, r *http.Request) {
-	// _, _ = fmt.Fprintf(w, "This is The Home Page")
-	render.RenderTemplate(w, "home.page.html")
+func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
+	// sum := addValues(2, 2)
+	// _, _ = fmt.Fprintf(w, fmt.Sprintf("This is The About Page and 2 + 2 is: %d", sum))
+	render.RenderTemplate(w, "home.page.html", &models.TemplateData{})
 }
 
 // About Page Handler
-func About(w http.ResponseWriter, r *http.Request) {
+func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
 	// sum := addValues(2, 2)
 	// _, _ = fmt.Fprintf(w, fmt.Sprintf("This is The About Page and 2 + 2 is: %d", sum))
-	render.RenderTemplate(w, "about.page.html")
+
+	// * We Will Perform Some Business Logic
+
+	stringMap := make(map[string]string)
+	stringMap["test"] = "Hello Again"
+
+	render.RenderTemplate(w, "about.page.html", &models.TemplateData{
+		StringMap: stringMap,
+	})
 }

@@ -2,9 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
+	"github.com/nomansalhab/golang_training_project/pkg/config"
 	"github.com/nomansalhab/golang_training_project/pkg/handlers"
+	"github.com/nomansalhab/golang_training_project/pkg/render"
 )
 
 const portNumber = ":8016"
@@ -32,6 +35,21 @@ const portNumber = ":8016"
 
 // main is the main application function
 func main() {
+	var app config.AppConfig
+
+	tc, err := render.CreateTemplateCache()
+	if err != nil {
+		log.Fatal("cannot create template cache")
+	}
+	app.TemplateCache = tc
+	// ? When in Development Mode UseCache is false
+	app.UseCache = false
+
+	repo := handlers.NewRepo(&app)
+	handlers.NewHandlers(repo)
+
+	render.NewTemplate(&app)
+
 	// http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 	// 	n, err := fmt.Fprintf(w, "Hello, World!")
 	// 	if err != nil {
@@ -39,8 +57,8 @@ func main() {
 	// 	}
 	// 	fmt.Println(fmt.Sprintf("Bytes Written: %d", n))
 	// })
-	http.HandleFunc("/", handlers.Home)
-	http.HandleFunc("/about", handlers.About)
+	http.HandleFunc("/", handlers.Repo.Home)
+	http.HandleFunc("/about", handlers.Repo.About)
 	// http.HandleFunc("/divide", Divide)
 
 	fmt.Printf("Starting Applicationon Port %s", portNumber)
